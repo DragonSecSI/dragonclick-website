@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DragonClick directory</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="header">
+        <!--<h1>DragonClick directory</h1>-->
+        <div class="instruction">&gt; DIAL THE NAME TO OPEN WEBSITE &lt;</div>
+    </div>
+
+    <div class="main-container">
+        <div class="left-column">
+            <div class="display" id="display">_</div>
+            <div class="contacts" id="contacts"></div>
+        </div>
+
+        <div class="right-column">
+            <div class="keypad">
+                <button class="key" data-num="1"><span class="key-num">1</span><span class="key-letters"></span></button>
+                <button class="key" data-num="2"><span class="key-num">2</span><span class="key-letters">ABC</span></button>
+                <button class="key" data-num="3"><span class="key-num">3</span><span class="key-letters">DEF</span></button>
+                <button class="key" data-num="4"><span class="key-num">4</span><span class="key-letters">GHI</span></button>
+                <button class="key" data-num="5"><span class="key-num">5</span><span class="key-letters">JKL</span></button>
+                <button class="key" data-num="6"><span class="key-num">6</span><span class="key-letters">MNO</span></button>
+                <button class="key" data-num="7"><span class="key-num">7</span><span class="key-letters">PQRS</span></button>
+                <button class="key" data-num="8"><span class="key-num">8</span><span class="key-letters">TUV</span></button>
+                <button class="key" data-num="9"><span class="key-num">9</span><span class="key-letters">WXYZ</span></button>
+                <button class="key" data-num="*"><span class="key-num">X</span></button>
+                <button class="key" data-num="0"><span class="key-num">0</span><span class="key-letters">SPACE</span></button>
+                <button class="key" data-num="#"><span class="key-num">&lt;</span></button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const CONTACTS = [
+            { name: 'LeftClick', url: 'https://leftclick.si' },
+            { name: 'DragonSec SI', url: 'https://dragonsec.si' },
+            { name: 'Kompot', url: 'https://kompot.si' },
+            { name: 'Kiberpipa', url: 'https://kiberpipa.org' }
+        ];
+
+        const T9_MAP = {
+            '2': 'abc', '3': 'def', '4': 'ghi', '5': 'jkl',
+            '6': 'mno', '7': 'pqrs', '8': 'tuv', '9': 'wxyz', '0': ' '
+        };
+
+        let currentInput = '';
+        const display = document.getElementById('display');
+        const contactsDiv = document.getElementById('contacts');
+
+        function matchesT9(name, input) {
+            if (input === '') return true;
+
+            let nameIndex = 0;
+            const nameLower = name.toLowerCase();
+
+            for (let i = 0; i < input.length; i++) {
+                const digit = input[i];
+                const letters = T9_MAP[digit] || '';
+
+                let found = false;
+                while (nameIndex < nameLower.length) {
+                    if (letters.includes(nameLower[nameIndex])) {
+                        found = true;
+                        nameIndex++;
+                        break;
+                    }
+                    nameIndex++;
+                }
+
+                if (!found) return false;
+            }
+
+            return true;
+        }
+
+        function updateDisplay() {
+            const filtered = CONTACTS.filter(c => matchesT9(c.name, currentInput));
+
+            contactsDiv.innerHTML = filtered.length > 0
+                ? filtered.map(c => `<div class="contact">${c.name}</div>`).join('')
+                : '<div class="contact">NO MATCHES</div>';
+
+            display.textContent = currentInput || '_';
+
+            if (filtered.length === 1) {
+                display.innerHTML = '<span class="redirecting">REDIRECTING...</span>';
+                setTimeout(() => {
+                    window.location.href = filtered[0].url;
+                }, 1000);
+            }
+        }
+
+        document.querySelectorAll('.key').forEach(key => {
+            key.addEventListener('click', () => {
+                const num = key.dataset.num;
+                if (num === '#') {
+                    currentInput = currentInput.slice(0, -1);
+                } else if (num === '*') {
+                    currentInput = '';
+                } else if (T9_MAP[num] !== undefined) {
+                    currentInput += num;
+                }
+                updateDisplay();
+            });
+        });
+
+        updateDisplay();
+    </script>
+</body>
+</html>
